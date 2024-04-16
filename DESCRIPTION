@@ -62,7 +62,8 @@ Suggests:
 	ResultModelManager,
 	ShinyAppBuilder (>= 1.2.0),
 	markdown,
-	remotes
+	remotes,
+	redux
 Remotes:
 	ohdsi/FeatureExtraction,
 	ohdsi/Eunomia,

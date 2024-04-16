@@ -5,6 +5,7 @@ readr::local_edition(1)
 
 connectionDetails <- getEunomiaConnectionDetails()
 Eunomia::createCohorts(connectionDetails)
+options("use.redsis.cache" = TRUE)
 
 # fitOutcomeModel ----
 ## Study Population ----
@@ -217,7 +218,8 @@ cmAnalysisList <- list(cmAnalysis1, cmAnalysis2, cmAnalysis3, cmAnalysis4)
 withr::defer(
   {
     unlink(outputFolder)
-
+    if (getOption("use.redsis.cache", default = FALSE))
+      deleteRedisCache()
     # Remove the Eunomia database:
     unlink(connectionDetails$server())
     if (getOption("use.devtools.sql_shim", FALSE)) {

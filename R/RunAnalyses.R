@@ -261,7 +261,7 @@ runCmAnalyses <- function(connectionDetails,
   outputFolder <- normalizePath(outputFolder, mustWork = FALSE)
   cmAnalysisListFile <- file.path(outputFolder, "cmAnalysisList.rds")
   if (file.exists(cmAnalysisListFile)) {
-    oldCmAnalysisList <- readRDS(cmAnalysisListFile)
+    oldCmAnalysisList <- readResultObject(cmAnalysisListFile)
     if (!isTRUE(all.equal(oldCmAnalysisList, cmAnalysisList))) {
       rm(list=ls(envir = cache), envir = cache)
       message(sprintf("Output files already exist in '%s', but the analysis settings have changed.", outputFolder))
@@ -294,7 +294,7 @@ runCmAnalyses <- function(connectionDetails,
   # Create cohortMethodData objects -----------------------------
   subset <- referenceTable[!duplicated(referenceTable$cohortMethodDataFile), ]
   subset <- subset[subset$cohortMethodDataFile != "", ]
-  subset <- subset[!file.exists(file.path(outputFolder, subset$cohortMethodDataFile)), ]
+  subset <- subset[!objectExists(file.path(outputFolder, subset$cohortMethodDataFile)), ]
   if (nrow(subset) != 0) {
     message("*** Creating cohortMethodData objects ***")
     createCmDataTask <- function(i) {
@@ -356,7 +356,7 @@ runCmAnalyses <- function(connectionDetails,
   # Create study populations --------------------------------------
   subset <- referenceTable[!duplicated(referenceTable$studyPopFile), ]
   subset <- subset[subset$studyPopFile != "", ]
-  subset <- subset[!file.exists(file.path(outputFolder, subset$studyPopFile)), ]
+  subset <- subset[!objectExists(file.path(outputFolder, subset$studyPopFile)), ]
   if (nrow(subset) != 0) {
     message("*** Creating study populations ***")
     createStudyPopTask <- function(i) {
@@ -417,7 +417,7 @@ runCmAnalyses <- function(connectionDetails,
   if (refitPsForEveryOutcome) {
     subset <- referenceTable[!duplicated(referenceTable$psFile), ]
     subset <- subset[subset$psFile != "", ]
-    subset <- subset[!file.exists(file.path(outputFolder, subset$psFile)), ]
+    subset <- subset[!objectExists(file.path(outputFolder, subset$psFile)), ]
     if (nrow(subset) != 0) {
       message("*** Fitting propensity models ***")
       createPsTask <- function(i) {
@@ -449,7 +449,7 @@ runCmAnalyses <- function(connectionDetails,
   } else {
     subset <- referenceTable[!duplicated(referenceTable$sharedPsFile), ]
     subset <- subset[subset$sharedPsFile != "", ]
-    subset <- subset[!file.exists(file.path(outputFolder, subset$sharedPsFile)), ]
+    subset <- subset[!objectExists(file.path(outputFolder, subset$sharedPsFile)), ]
     if (nrow(subset) != 0) {
       message("*** Fitting shared propensity models ***")
       createSharedPsTask <- function(i) {
@@ -481,7 +481,7 @@ runCmAnalyses <- function(connectionDetails,
 
     subset <- referenceTable[!duplicated(referenceTable$psFile), ]
     subset <- subset[subset$psFile != "", ]
-    subset <- subset[!file.exists(file.path(outputFolder, subset$psFile)), ]
+    subset <- subset[!objectExists(file.path(outputFolder, subset$psFile)), ]
     if (nrow(subset) != 0) {
       message("*** Adding propensity scores to study population objects ***")
       tasks <- split(subset, subset$sharedPsFile)
@@ -495,7 +495,7 @@ runCmAnalyses <- function(connectionDetails,
   # Trimming/Matching/Stratifying -----------------------------------------
   subset <- referenceTable[!duplicated(referenceTable$strataFile), ]
   subset <- subset[subset$strataFile != "", ]
-  subset <- subset[!file.exists(file.path(outputFolder, subset$strataFile)), ]
+  subset <- subset[!objectExists(file.path(outputFolder, subset$strataFile)), ]
   if (nrow(subset) != 0) {
     message("*** Trimming/Matching/Stratifying ***")
     createTrimMatchStratTask <- function(i) {
@@ -522,7 +522,7 @@ runCmAnalyses <- function(connectionDetails,
   # Computing shared covariate balance ----------------------------------
   subset <- referenceTable[!duplicated(referenceTable$sharedBalanceFile), ]
   subset <- subset[subset$sharedBalanceFile != "", ]
-  subset <- subset[!file.exists(file.path(outputFolder, subset$sharedBalanceFile)), ]
+  subset <- subset[!objectExists(file.path(outputFolder, subset$sharedBalanceFile)), ]
   if (nrow(subset) != 0) {
     message("*** Computing shared covariate balance ***")
     createSharedBalanceTask <- function(i) {
@@ -553,7 +553,7 @@ runCmAnalyses <- function(connectionDetails,
   # Filtering covariates for computing covariate balance ------------------------------
   subset <- referenceTable[!duplicated(referenceTable$filteredForbalanceFile), ]
   subset <- subset[subset$filteredForbalanceFile != "", ]
-  subset <- subset[!file.exists(file.path(outputFolder, subset$filteredForbalanceFile)), ]
+  subset <- subset[!objectExists(file.path(outputFolder, subset$filteredForbalanceFile)), ]
   if (nrow(subset) != 0) {
     message("*** Filtering covariates for computing covariate balance ***")
     createFilterForCovariateBalanceTask <- function(i) {
@@ -581,7 +581,7 @@ runCmAnalyses <- function(connectionDetails,
   # Computing covariate balance (per outcome) -----------------------
   subset <- referenceTable[!duplicated(referenceTable$balanceFile), ]
   subset <- subset[subset$balanceFile != "", ]
-  subset <- subset[!file.exists(file.path(outputFolder, subset$balanceFile)), ]
+  subset <- subset[!objectExists(file.path(outputFolder, subset$balanceFile)), ]
   if (nrow(subset) != 0) {
     message("*** Computing covariate balance (per outcome) ***")
     createBalanceTask <- function(i) {
@@ -615,7 +615,7 @@ runCmAnalyses <- function(connectionDetails,
   # Prefiltering covariates for outcome models  -------------------------
   subset <- referenceTable[!duplicated(referenceTable$prefilteredCovariatesFile), ]
   subset <- subset[subset$prefilteredCovariatesFile != "", ]
-  subset <- subset[!file.exists(file.path(outputFolder, subset$prefilteredCovariatesFile)), ]
+  subset <- subset[!objectExists(file.path(outputFolder, subset$prefilteredCovariatesFile)), ]
   if (nrow(subset) != 0) {
     message("*** Prefiltering covariates for outcome models ***")
     createPrefilterTask <- function(i) {
@@ -646,7 +646,7 @@ runCmAnalyses <- function(connectionDetails,
 
   # Fitting outcome models --------------------------
   subset <- referenceTable[referenceTable$outcomeOfInterest & referenceTable$outcomeModelFile != "", ]
-  subset <- subset[!file.exists(file.path(outputFolder, subset$outcomeModelFile)), ]
+  subset <- subset[!objectExists(file.path(outputFolder, subset$outcomeModelFile)), ]
   if (nrow(subset) != 0) {
     message("*** Fitting outcome models for outcomes of interest ***")
 
@@ -685,7 +685,7 @@ runCmAnalyses <- function(connectionDetails,
   }
 
   subset <- referenceTable[!referenceTable$outcomeOfInterest & referenceTable$outcomeModelFile != "", ]
-  subset <- subset[!file.exists(file.path(outputFolder, subset$outcomeModelFile)), ]
+  subset <- subset[!objectExists(file.path(outputFolder, subset$outcomeModelFile)), ]
   if (nrow(subset) != 0) {
     message("*** Fitting outcome models for other outcomes ***")
 
@@ -754,7 +754,7 @@ getPs <- function(psFile) {
   if (mget("psFile", envir = cache, ifnotfound = "") == psFile) {
     ps <- get("ps", envir = cache)
   } else {
-    ps <- readRDS(psFile)
+    ps <- readResultObject(psFile)
     assign("ps", ps, envir = cache)
     assign("psFile", psFile, envir = cache)
   }
@@ -783,13 +783,13 @@ doCreateStudyPopObject <- function(params) {
     studyPop <- studyPop[, c("rowId", "treatment", "personSeqId", "outcomeCount", "timeAtRisk", "survivalTime")]
     attr(studyPop, "metaData") <- metaData
   }
-  saveRDS(studyPop, params$studyPopFile)
+  saveResultObject(studyPop, params$studyPopFile)
   return(NULL)
 }
 
 doFitPsModel <- function(params) {
   cohortMethodData <- getCohortMethodData(params$cohortMethodDataFile)
-  studyPop <- readRDS(params$studyPopFile)
+  studyPop <- readResultObject(params$studyPopFile)
   args <- params$args
   args$cohortMethodData <- cohortMethodData
   args$population <- studyPop
@@ -797,7 +797,7 @@ doFitPsModel <- function(params) {
                                    params$cohortMethodDataFile,
                                    params$studyPopFile))
   ps <- do.call("createPs", args)
-  saveRDS(ps, params$psFile)
+  saveResultObject(ps, params$psFile)
   return(NULL)
 }
 
@@ -817,18 +817,18 @@ doFitSharedPsModel <- function(params, refitPsForEveryStudyPopulation) {
   args$cohortMethodData <- cohortMethodData
   args$population <- studyPop
   ps <- do.call("createPs", args)
-  saveRDS(ps, params$sharedPsFile)
+  saveResultObject(ps, params$sharedPsFile)
   return(NULL)
 }
 
 addPsToStudyPopForSubset <- function(subset, outputFolder) {
-  ps <- readRDS(file.path(outputFolder, subset$sharedPsFile[1]))
+  ps <- readResultObject(file.path(outputFolder, subset$sharedPsFile[1]))
 
   addToStudyPop <- function(i) {
     refRow <- subset[i, ]
-    studyPop <- readRDS(file.path(outputFolder, refRow$studyPopFile))
+    studyPop <- readResultObject(file.path(outputFolder, refRow$studyPopFile))
     studyPop <- addPsToStudyPopulation(studyPop, ps)
-    saveRDS(studyPop, file.path(outputFolder, refRow$psFile))
+    saveResultObject(studyPop, file.path(outputFolder, refRow$psFile))
     return(NULL)
   }
   plyr::l_ply(1:nrow(subset), addToStudyPop)
@@ -896,7 +896,7 @@ doTrimMatchStratify <- function(params) {
   ParallelLogger::logDebug(sprintf("Performing matching etc., using %s",
                                    params$psFile))
   ps <- applyTrimMatchStratify(ps, params$args)
-  saveRDS(ps, params$strataFile)
+  saveResultObject(ps, params$strataFile)
   return(NULL)
 }
 
@@ -942,14 +942,14 @@ doFitOutcomeModel <- function(params) {
     cohortMethodDataFile <- params$prefilteredCovariatesFile
   }
   cohortMethodData <- getCohortMethodData(cohortMethodDataFile)
-  studyPop <- readRDS(params$studyPopFile)
+  studyPop <- readResultObject(params$studyPopFile)
   args <- list(cohortMethodData = cohortMethodData, population = studyPop)
   args <- append(args, params$args)
   ParallelLogger::logDebug(sprintf("Calling fitOutcomeModel() using %s and %s",
                                    cohortMethodDataFile,
                                    params$studyPopFile))
   outcomeModel <- do.call("fitOutcomeModel", args)
-  saveRDS(outcomeModel, params$outcomeModelFile)
+  saveResultObject(outcomeModel, params$outcomeModelFile)
   return(NULL)
 }
 
@@ -985,7 +985,7 @@ doFitOutcomeModelPlus <- function(params) {
   args$population <- ps
   args$cohortMethodData <- cohortMethodData
   outcomeModel <- do.call("fitOutcomeModel", args)
-  saveRDS(outcomeModel, params$outcomeModelFile)
+  saveResultObject(outcomeModel, params$outcomeModelFile)
   return(NULL)
 }
 
@@ -1016,7 +1016,7 @@ doComputeSharedBalance <- function(params) {
   args$population <- ps
   args$cohortMethodData <- cohortMethodData
   balance <- do.call("computeCovariateBalance", args)
-  saveRDS(balance, params$sharedBalanceFile)
+  saveResultObject(balance, params$sharedBalanceFile)
   return(NULL)
 }
 
@@ -1044,7 +1044,7 @@ doComputeBalance <- function(params) {
   } else {
     cohortMethodData <- getCohortMethodData(params$filteredForbalanceFile)
   }
-  strataPop <- readRDS(params$strataFile)
+  strataPop <- readResultObject(params$strataFile)
 
   args <- params$computeCovariateBalanceArgs
   args$population <- strataPop
@@ -1053,7 +1053,7 @@ doComputeBalance <- function(params) {
                                    params$cohortMethodDataFile,
                                    params$strataFile))
   balance <- do.call("computeCovariateBalance", args)
-  saveRDS(balance, params$balanceFile)
+  saveResultObject(balance, params$balanceFile)
   return(NULL)
 }
 
@@ -1709,7 +1709,7 @@ summarizeResults <- function(referenceTable, outputFolder, mainFileName, interac
   interActionResults <- list()
   pb <- txtProgressBar(style = 3)
   for (i in seq_len(nrow(subset))) {
-    outcomeModel <- readRDS(file.path(outputFolder, subset$outcomeModelFile[i]))
+    outcomeModel <- readResultObject(file.path(outputFolder, subset$outcomeModelFile[i]))
     coefficient <- as.vector(coef(outcomeModel))
     ci <- confint(outcomeModel)
     if (is.null(coefficient)) {

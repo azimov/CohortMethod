@@ -388,7 +388,7 @@ exportAttrition <- function(outputFolder,
   first <- !file.exists(fileName)
   pb <- txtProgressBar(style = 3)
   for (i in seq_len(nrow(reference))) {
-    outcomeModel <- readRDS(file.path(outputFolder, reference$outcomeModelFile[i]))
+    outcomeModel <- readResultObject(file.path(outputFolder, reference$outcomeModelFile[i]))
     attrition <- outcomeModel$attrition %>%
       select("description", "targetPersons", "comparatorPersons") %>%
       mutate(sequenceNumber = row_number())
@@ -430,9 +430,9 @@ exportCmFollowUpDist <- function(outputFolder,
   # row = rows[1, ]
   getFollowUpDist <- function(row) {
     if (row$strataFile == "") {
-      strataPop <- readRDS(file.path(outputFolder, row$studyPopFile))
+      strataPop <- readResultObject(file.path(outputFolder, row$studyPopFile))
     } else {
-      strataPop <- readRDS(file.path(outputFolder, row$strataFile))
+      strataPop <- readResultObject(file.path(outputFolder, row$strataFile))
     }
     targetDist <- quantile(
       strataPop$survivalTime[strataPop$treatment == 1],
@@ -606,7 +606,7 @@ exportLikelihoodProfiles <- function(outputFolder,
   pb <- txtProgressBar(style = 3)
   for (i in seq_len(nrow(reference))) {
     if (reference$outcomeModelFile[i] != "") {
-      outcomeModel <- readRDS(file.path(outputFolder, reference$outcomeModelFile[i]))
+      outcomeModel <- readResultObject(file.path(outputFolder, reference$outcomeModelFile[i]))
       profile <- outcomeModel$logLikelihoodProfile
       if (!is.null(profile)) {
         profile <- profile %>%
@@ -656,7 +656,7 @@ exportCovariateBalance <- function(outputFolder,
   for (i in seq_along(balanceFiles)) {
     rows <- reference %>%
       filter(.data$balanceFile == !!balanceFiles[i])
-    balance <- readRDS(file.path(outputFolder, balanceFiles[i]))
+    balance <- readResultObject(file.path(outputFolder, balanceFiles[i]))
     balance <- tibble(
       databaseId = !!databaseId,
       targetId = rows$targetId[1],
@@ -699,7 +699,7 @@ exportSharedCovariateBalance <- function(outputFolder,
   for (i in seq_along(sharedBalanceFiles)) {
     rows <- reference %>%
       filter(.data$sharedBalanceFile == sharedBalanceFiles[i])
-    balance <- readRDS(file.path(outputFolder, sharedBalanceFiles[i]))
+    balance <- readResultObject(file.path(outputFolder, sharedBalanceFiles[i]))
     balance <- tibble(
       databaseId = !!databaseId,
       targetId = rows$targetId[1],
@@ -816,7 +816,7 @@ exportPreferenceScoreDistribution <- function(outputFolder,
 
   # rows <- split(reference, reference$sharedPsFile)[[2]]
   preparePlot <- function(rows) {
-    ps <- readRDS(file.path(outputFolder, rows$sharedPsFile[1]))
+    ps <- readResultObject(file.path(outputFolder, rows$sharedPsFile[1]))
     if (nrow(ps) > 0 &&
         min(ps$propensityScore) < max(ps$propensityScore) &&
         sum(ps$treatment == 1) > 1 &&
@@ -862,7 +862,7 @@ exportPropensityModel <- function(outputFolder,
 
   # rows <- split(reference, reference$sharedPsFile)[[1]]
   prepareData <- function(rows) {
-    ps <- readRDS(file.path(outputFolder, rows$sharedPsFile[1]))
+    ps <- readResultObject(file.path(outputFolder, rows$sharedPsFile[1]))
     metaData <- attr(ps, "metaData")
     if (is.null(metaData$psError)) {
       model <- metaData$psModelCoef
@@ -934,7 +934,7 @@ exportKaplanMeier <- function(outputFolder,
   first <- TRUE
   pb <- txtProgressBar(style = 3)
   for (i in seq_along(files)) {
-    data <- readRDS(files[i])
+    data <- readResultObject(files[i])
     writeToCsv(data, outputFile, append = !first)
     first <- FALSE
     if (i %% 100 == 10) {
@@ -980,7 +980,7 @@ prepareKm <- function(task,
   if (popFile == "") {
     popFile <- task$studyPopFile
   }
-  population <- readRDS(file.path(
+  population <- readResultObject(file.path(
     outputFolder,
     popFile
   ))
@@ -1003,7 +1003,7 @@ prepareKm <- function(task,
   # Avoid SQL reserved word 'time':
   data <- data %>%
     rename(timeDay = "time")
-  saveRDS(data, outputFileName)
+  saveResultObject(data, outputFileName)
 }
 
 prepareKaplanMeier <- function(population) {
@@ -1157,7 +1157,7 @@ exportDiagnosticsSummary <- function(outputFolder,
   resultsSummary <- getResultsSummary(outputFolder)
 
   getMaxSdms <- function(balanceFile) {
-    balance <- readRDS(file.path(outputFolder, balanceFile))
+    balance <- readResultObject(file.path(outputFolder, balanceFile))
     if (nrow(balance) == 0) {
       tibble(balanceFile = !!balanceFile,
              maxSdm = as.numeric(NA),
@@ -1175,7 +1175,7 @@ exportDiagnosticsSummary <- function(outputFolder,
     }
   }
   getEquipoise <- function(sharedPsFile) {
-    ps <- readRDS(file.path(outputFolder, sharedPsFile))
+    ps <- readResultObject(file.path(outputFolder, sharedPsFile))
     tibble(sharedPsFile = !!sharedPsFile,
            equipoise = computeEquipoise(ps)) %>%
       return()
